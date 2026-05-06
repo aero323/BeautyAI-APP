@@ -1,8 +1,22 @@
-import { useNavigate } from "react-router-dom";
-import { ArrowLeft, CheckCircle2, RotateCcw, MessageSquare, AlertTriangle, Star, Lightbulb } from "lucide-react";
+import { useEffect, type ReactNode } from "react";
+import { useNavigate, useParams, useSearchParams } from "react-router-dom";
+import { ArrowLeft, CheckCircle2, RotateCcw, AlertTriangle, Star, Lightbulb } from "lucide-react";
+import { useMockAuth } from "../context/MockAuthContext";
+import { getPracticeUnitId } from "../data/mockData";
 
 export function AIPracticeResult() {
   const navigate = useNavigate();
+  const { id } = useParams();
+  const [searchParams] = useSearchParams();
+  const missionId = searchParams.get("missionId");
+  const { user, regionData, recordCompletion } = useMockAuth();
+  const persona = regionData?.personas.find(item => String(item.id) === id) ?? regionData?.personas[0];
+  useEffect(() => {
+    if (persona) {
+      recordCompletion("practice", undefined, getPracticeUnitId("persona", persona.id));
+    }
+  }, [recordCompletion, persona]);
+  if (!user || !persona) return null;
 
   return (
     <div className="flex flex-col min-h-screen bg-background pb-8">
@@ -20,8 +34,8 @@ export function AIPracticeResult() {
             <span className="text-5xl font-black text-rose-500 tracking-tighter">82</span>
             <div className="absolute -bottom-3 bg-gradient-to-r from-pink-500 to-rose-400 text-white text-[10px] px-3 py-1 rounded-full font-bold shadow-md">Overall Score</div>
           </div>
-          <h2 className="font-black text-gray-800 mt-8 text-xl">Great Job, Sarah! 🎉</h2>
-          <p className="text-[11px] text-gray-400 mt-2 font-medium">Sensitive Skin Consultation (Ibu Sarah)</p>
+          <h2 className="font-black text-gray-800 mt-8 text-xl">Great Job, {user.greetingName}! 🎉</h2>
+          <p className="text-[11px] text-gray-400 mt-2 font-medium">{persona.name}</p>
         </div>
 
         {/* Dimensions */}
@@ -56,12 +70,9 @@ export function AIPracticeResult() {
         </div>
         
         {/* Actions */}
-        <div className="grid grid-cols-2 gap-3 mt-4">
+        <div className="mt-4">
           <button onClick={() => navigate(-1)} className="py-4 bg-white border border-pink-200 text-rose-600 rounded-[20px] font-bold text-sm flex justify-center items-center gap-2 shadow-sm transition-colors hover:bg-rose-50">
             <RotateCcw size={16} /> Try Again
-          </button>
-          <button className="py-4 bg-gradient-to-r from-pink-500 to-rose-400 text-white rounded-[20px] font-bold text-sm flex justify-center items-center gap-2 shadow-lg shadow-rose-200 transition-transform hover:scale-[1.02]">
-            <MessageSquare size={16} /> View Chat
           </button>
         </div>
       </div>
@@ -69,7 +80,7 @@ export function AIPracticeResult() {
   );
 }
 
-function ScoreBar({ label, score, icon, color = 'bg-rose-500' }: { label: string, score: number, icon?: React.ReactNode, color?: string }) {
+function ScoreBar({ label, score, icon, color = 'bg-rose-500' }: { label: string, score: number, icon?: ReactNode, color?: string }) {
   return (
     <div>
       <div className="flex justify-between text-[11px] mb-2 font-bold">
@@ -85,5 +96,3 @@ function ScoreBar({ label, score, icon, color = 'bg-rose-500' }: { label: string
     </div>
   )
 }
-
-

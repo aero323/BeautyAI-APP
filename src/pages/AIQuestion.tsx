@@ -1,16 +1,20 @@
 import { useState, useRef, useEffect } from "react";
 import { Send, Bot, User, ArrowLeft, Search, Lightbulb } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { useMockAuth } from "../context/MockAuthContext";
 
 export function AIQuestion() {
   const navigate = useNavigate();
+  const { user, regionData } = useMockAuth();
   const [messages, setMessages] = useState([
-    { role: "ai", text: "Hello Sarah! Ask me anything about our products, ingredients, or brand knowledge. I'm here to help you assist customers better.", source: null }
+    { role: "ai", text: `Hello ${user?.greetingName ?? "BA"}! Ask me anything about your regional products, ingredients, or brand knowledge.`, source: null as string | null }
   ]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
   const [category, setCategory] = useState("All");
   const bottomRef = useRef<HTMLDivElement>(null);
+
+  if (!regionData) return null;
 
   const categories = ["All", "Skincare", "Makeup", "Fragrance", "Body", "Ingredients"];
 
@@ -24,8 +28,8 @@ export function AIQuestion() {
     setTimeout(() => {
       setMessages(prev => [...prev, { 
         role: "ai", 
-        text: "For sensitive skin looking to brighten, I highly recommend the Centella Brightening Serum.\n\n✨ Key Ingredients: \n- 5% Niacinamide (Brightens)\n- Centella Asiatica (Soothes redness)\n\n💬 Selling Point: \n'It's specially formulated for sensitive skin. It brightens without irritation because the Centella calms your skin at the same time.'\n\nIs there a specific customer concern you are dealing with right now?", 
-        source: "Source: Product Manual v2.4 (Page 12)" 
+        text: regionData.assistantAnswer, 
+        source: regionData.assistantSource
       }]);
       setLoading(false);
     }, 1500);
@@ -71,8 +75,8 @@ export function AIQuestion() {
             <div className="mb-8 pt-4">
                <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest text-center mb-4">Suggested Queries</p>
                <div className="flex flex-wrap gap-2 justify-center">
-                  <span className="bg-white border border-pink-100 text-rose-500 text-[11px] px-3 py-1.5 rounded-xl shadow-sm cursor-pointer hover:bg-pink-50 transition-colors">"Alternatives to Retinol?"</span>
-                  <span className="bg-white border border-indigo-100 text-indigo-500 text-[11px] px-3 py-1.5 rounded-xl shadow-sm cursor-pointer hover:bg-indigo-50 transition-colors">"New Summer Collection details"</span>
+                  <span className="bg-white border border-pink-100 text-rose-500 text-[11px] px-3 py-1.5 rounded-xl shadow-sm cursor-pointer hover:bg-pink-50 transition-colors">"Regional hero product?"</span>
+                  <span className="bg-white border border-indigo-100 text-indigo-500 text-[11px] px-3 py-1.5 rounded-xl shadow-sm cursor-pointer hover:bg-indigo-50 transition-colors">"{user?.regionName} customer concerns"</span>
                </div>
             </div>
          )}

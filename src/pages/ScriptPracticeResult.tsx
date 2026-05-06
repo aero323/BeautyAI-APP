@@ -1,8 +1,21 @@
-import { useNavigate } from "react-router-dom";
+import { useEffect } from "react";
+import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { ArrowLeft, RotateCcw, AlertTriangle } from "lucide-react";
+import { useMockAuth } from "../context/MockAuthContext";
+import { getPracticeUnitId } from "../data/mockData";
 
 export function ScriptPracticeResult() {
   const navigate = useNavigate();
+  const { id } = useParams();
+  const [searchParams] = useSearchParams();
+  const missionId = searchParams.get("missionId");
+  const { recordCompletion } = useMockAuth();
+
+  useEffect(() => {
+    if (id) {
+      recordCompletion("practice", undefined, getPracticeUnitId("scenario", Number(id)));
+    }
+  }, [id, recordCompletion]);
 
   const steps = [
     { name: "①开场问候", score: 92, warning: false },
@@ -67,7 +80,16 @@ export function ScriptPracticeResult() {
           </div>
         </div>
 
-        <button onClick={() => navigate(-1)} className="w-full py-4 bg-gradient-to-r from-indigo-500 to-indigo-400 text-white rounded-[20px] font-bold shadow-md shadow-indigo-200 transition-transform hover:scale-[1.02] flex items-center justify-center gap-2">
+        <button
+          onClick={() => {
+            if (missionId) {
+              navigate(`/tasks/practice/${missionId}`);
+              return;
+            }
+            navigate("/practice");
+          }}
+          className="w-full py-4 bg-gradient-to-r from-indigo-500 to-indigo-400 text-white rounded-[20px] font-bold shadow-md shadow-indigo-200 transition-transform hover:scale-[1.02] flex items-center justify-center gap-2"
+        >
           <RotateCcw size={16} /> 再次挑战
         </button>
       </div>

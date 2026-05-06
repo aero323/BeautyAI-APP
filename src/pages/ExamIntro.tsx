@@ -1,9 +1,13 @@
 import { useNavigate, useParams } from "react-router-dom";
 import { ArrowLeft, Clock, FileText, Camera, ShieldAlert } from "lucide-react";
+import { useMockAuth } from "../context/MockAuthContext";
 
 export function ExamIntro() {
   const navigate = useNavigate();
   const { id } = useParams();
+  const { regionData } = useMockAuth();
+  const exam = regionData?.exams.find(item => String(item.id) === id) ?? regionData?.exams[0];
+  if (!exam) return null;
 
   return (
     <div className="flex flex-col min-h-screen bg-background">
@@ -14,8 +18,8 @@ export function ExamIntro() {
           <ArrowLeft size={20} />
         </button>
         <div className="absolute bottom-6 left-6 right-6 text-white">
-          <span className="bg-white text-rose-500 text-[10px] px-3 py-1 rounded-full font-bold mb-3 inline-block shadow-sm">New Product</span>
-          <h1 className="text-2xl font-black tracking-tight leading-snug">Summer 2024 Product Knowledge Exam</h1>
+          <span className="bg-white text-rose-500 text-[10px] px-3 py-1 rounded-full font-bold mb-3 inline-block shadow-sm">{exam.topic}</span>
+          <h1 className="text-2xl font-black tracking-tight leading-snug">{exam.title}</h1>
         </div>
       </div>
 
@@ -24,11 +28,11 @@ export function ExamIntro() {
         <div className="flex justify-between items-center bg-white p-5 rounded-[32px] mb-6 shadow-sm border border-pink-100 relative">
           <div className="flex flex-col items-center flex-1 border-r border-pink-50">
             <span className="text-[10px] text-gray-500 font-bold tracking-widest uppercase mb-1 flex items-center gap-1"><FileText size={12}/> Questions</span>
-            <span className="text-xl font-black text-rose-500">20</span>
+            <span className="text-xl font-black text-rose-500">{exam.questions}</span>
           </div>
           <div className="flex flex-col items-center flex-1 border-r border-pink-50">
              <span className="text-[10px] text-gray-500 font-bold tracking-widest uppercase mb-1 flex items-center gap-1"><Clock size={12}/> Duration</span>
-            <span className="text-xl font-black text-indigo-500">30m</span>
+            <span className="text-xl font-black text-indigo-500">{exam.time}</span>
           </div>
           <div className="flex flex-col items-center flex-1">
              <span className="text-[10px] text-gray-500 font-bold tracking-widest uppercase mb-1 flex items-center gap-1"><ShieldAlert size={12}/> Rule</span>

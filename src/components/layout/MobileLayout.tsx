@@ -1,3 +1,4 @@
+import type { ReactNode } from "react";
 import { Outlet, NavLink, useLocation } from "react-router-dom";
 import { Home, MessageSquare, BookOpen, User, Zap } from "lucide-react";
 import { cn } from "../../lib/utils";
@@ -24,18 +25,7 @@ export default function MobileLayout() {
           <div className="absolute bottom-0 w-full h-20 bg-white/90 backdrop-blur-md dark:bg-gray-950/90 border-t border-pink-100 dark:border-gray-800 flex items-center justify-around px-2 pb-safe rounded-t-3xl shadow-[0_-4px_20px_rgba(244,63,94,0.05)] z-50">
             <NavItem to="/" icon={<Home size={22} />} label="Home" />
             <NavItem to="/course" icon={<BookOpen size={22} />} label="Course" />
-            
-            {/* Center prominent button for Practice */}
-            <NavLink
-              to="/practice"
-              className="flex flex-col items-center justify-center h-full pt-2 w-14 group z-50"
-            >
-              <div className="w-10 h-10 bg-gradient-to-r from-pink-500 to-rose-400 rounded-full shadow-md shadow-rose-200 flex items-center justify-center text-white transition-transform group-hover:scale-105">
-                <MessageSquare size={20} />
-              </div>
-              <span className="text-[10px] font-bold text-rose-500 mt-1">Practice</span>
-            </NavLink>
-            
+            <NavItem to="/practice" icon={<MessageSquare size={22} />} label="Practice" />
             <NavItem to="/exam" icon={<Zap size={22} />} label="Exam" />
             <NavItem to="/profile" icon={<User size={22} />} label="Profile" />
           </div>
@@ -45,7 +35,7 @@ export default function MobileLayout() {
   );
 }
 
-function NavItem({ to, icon, label }: { to: string; icon: React.ReactNode; label: string }) {
+function NavItem({ to, icon, label }: { to: string; icon: ReactNode; label: string }) {
   return (
     <NavLink
       to={to}
@@ -58,7 +48,12 @@ function NavItem({ to, icon, label }: { to: string; icon: React.ReactNode; label
     >
       {({ isActive }) => (
         <>
-          {icon}
+          <span className={cn(
+            "flex h-8 w-8 items-center justify-center rounded-2xl transition-colors",
+            isActive ? "bg-rose-50 text-rose-500" : "text-current"
+          )}>
+            {icon}
+          </span>
           <span className={cn("text-[10px]", isActive ? "font-bold" : "font-medium")}>{label}</span>
         </>
       )}

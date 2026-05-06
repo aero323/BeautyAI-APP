@@ -4,8 +4,10 @@
  */
 
 import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { MockAuthProvider, useMockAuth } from "./context/MockAuthContext";
 import MobileLayout from "./components/layout/MobileLayout";
 import { Home } from "./pages/Home";
+import { Login } from "./pages/Login";
 import { AIPractice } from "./pages/AIPractice";
 import { AIPracticeChat } from "./pages/AIPracticeChat";
 import { AIPracticeResult } from "./pages/AIPracticeResult";
@@ -19,8 +21,25 @@ import { ExamProcess } from "./pages/ExamProcess";
 import { ExamResult } from "./pages/ExamResult";
 import { AIQuestion } from "./pages/AIQuestion";
 import { Profile } from "./pages/Profile";
+import { TaskList } from "./pages/TaskList";
+import { PracticeTaskDetail } from "./pages/PracticeTaskDetail";
+import { StudyTaskDetail } from "./pages/StudyTaskDetail";
 
 export default function App() {
+  return (
+    <MockAuthProvider>
+      <AppRoutes />
+    </MockAuthProvider>
+  );
+}
+
+function AppRoutes() {
+  const { user } = useMockAuth();
+
+  if (!user) {
+    return <Login />;
+  }
+
   return (
     <BrowserRouter>
       <Routes>
@@ -39,6 +58,9 @@ export default function App() {
           <Route path="exam/result/:id" element={<ExamResult />} />
           <Route path="qa" element={<AIQuestion />} />
           <Route path="profile" element={<Profile />} />
+          <Route path="tasks" element={<TaskList />} />
+          <Route path="tasks/study/:missionId" element={<StudyTaskDetail />} />
+          <Route path="tasks/practice/:missionId" element={<PracticeTaskDetail />} />
         </Route>
       </Routes>
     </BrowserRouter>

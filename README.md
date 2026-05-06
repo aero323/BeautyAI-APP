@@ -1,20 +1,43 @@
-<div align="center">
-<img width="1200" height="475" alt="GHBanner" src="https://github.com/user-attachments/assets/0aa67016-6eaf-458a-adb2-6e31a0763ed6" />
-</div>
+# BeautyAI 学员端
 
-# Run and deploy your AI Studio app
+BeautyAI 学员端是一个面向门店 BA 的移动端训练应用，当前版本已把后台发布的学习、练习、考试任务接到首页和任务列表，并支持按大区读取 mock 数据。
 
-This contains everything you need to run your app locally.
+## 当前能力
 
-View your app in AI Studio: https://ai.studio/apps/297f6f65-1b5a-4120-8062-b30a7e38c447
+- 登录时可选择 mock 为雅加达大区或泗水大区店员。
+- 首页展示任务收件箱，支持学习任务、练习任务、考试任务统一管理。
+- 课程页展示课件列表、进度、来源筛选和搜索。
+- Practice 页支持数字人顾客、场景剧本、金句跟读三类练习。
+- 练习任务详情页会按资产类型拆分展示，并支持完成回传。
+- 在线考试页支持考试列表、考试说明、答题、结果页和完成记录。
+- 个人中心展示学习指标、大区排名和用户信息。
 
-## Run Locally
+## 本地运行
 
-**Prerequisites:**  Node.js
+1. 安装依赖
 
+```bash
+npm install
+```
 
-1. Install dependencies:
-   `npm install`
-2. Set the `GEMINI_API_KEY` in [.env.local](.env.local) to your Gemini API key
-3. Run the app:
-   `npm run dev`
+2. 启动开发服务
+
+```bash
+npm run dev
+```
+
+默认端口是 `3001`。
+
+## 技术栈
+
+- React 19
+- TypeScript
+- Vite
+- Tailwind CSS
+- React Router
+
+## 说明
+
+- 当前项目使用本地 mock 数据运行，不依赖 Gemini API key。
+- 任务、课件、练习、考试、排行榜都以 mock 数据模拟后端返回。
+- 这是一个学员端前台项目，重点是把后台的训练对象和任务流呈现出来。

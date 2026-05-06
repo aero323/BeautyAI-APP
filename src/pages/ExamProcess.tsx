@@ -1,15 +1,19 @@
 import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { Clock, Camera, AlertTriangle } from "lucide-react";
+import { useMockAuth } from "../context/MockAuthContext";
 
 export function ExamProcess() {
   const navigate = useNavigate();
   const { id } = useParams();
+  const { regionData } = useMockAuth();
+  const exam = regionData?.exams.find(item => String(item.id) === id) ?? regionData?.exams[0];
   
   const [timeLeft, setTimeLeft] = useState(30 * 60); // 30 mins
   const [currentQuestion, setCurrentQuestion] = useState(1);
   const [selectedAnswer, setSelectedAnswer] = useState<number | null>(null);
-  const totalQuestions = 20;
+  if (!exam) return null;
+  const totalQuestions = exam.questions;
 
   // Mock timer
   useEffect(() => {
@@ -41,7 +45,7 @@ export function ExamProcess() {
      }
   }
 
-  const options = ["3% 烟酰胺，4周内提亮", "5% 烟酰胺，2周内提亮", "10% 烟酰胺，1周内提亮", "2% 烟酰胺，8周内提亮"];
+  const options = exam.options;
 
   return (
     <div className="flex flex-col min-h-screen bg-background relative overflow-hidden">
@@ -98,10 +102,10 @@ export function ExamProcess() {
           <div className="mb-6 border-b border-pink-50 pb-4">
             <div className="flex justify-between items-center mb-3">
               <span className="bg-indigo-50 text-indigo-600 text-[10px] px-2 py-0.5 rounded-md font-bold uppercase tracking-widest border border-indigo-100 shadow-sm">Single Choice</span>
-              <span className="text-gray-400 text-[10px] font-bold">Topic: Ingredients</span>
+              <span className="text-gray-400 text-[10px] font-bold">Topic: {exam.topic}</span>
             </div>
             <h2 className="text-lg font-black text-gray-800 leading-snug">
-              新款烟酰胺美白精华的核心成分浓度是多少？它在什么时间内可以达到明显的提亮效果？
+              {exam.question}
             </h2>
           </div>
 

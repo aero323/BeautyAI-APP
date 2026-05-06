@@ -1,31 +1,37 @@
-import { useState, useRef, useEffect } from "react";
-import { useNavigate, useParams } from "react-router-dom";
-import { Mic, ArrowLeft, Lightbulb, Settings, FileText } from "lucide-react";
+import { useState } from "react";
+import { useNavigate, useParams, useSearchParams } from "react-router-dom";
+import { Mic, ArrowLeft, Lightbulb, Settings } from "lucide-react";
+import { useMockAuth } from "../context/MockAuthContext";
 
 export function AIPracticeChat() {
   const navigate = useNavigate();
   const { id } = useParams();
+  const [searchParams] = useSearchParams();
+  const missionId = searchParams.get("missionId");
+  const { regionData } = useMockAuth();
+  const persona = regionData?.personas.find(item => String(item.id) === id) ?? regionData?.personas[0];
   
   const [messages, setMessages] = useState([
-    { role: "ai", text: "Mbak, saya mau tanya. Kulit saya sensitif dan sering kemerahan. Ada produk yang cocok nggak ya? \n(小姐，我想问一下。我的皮肤敏感经常泛红。有没有适合的产品？)" }
+    { role: "ai", text: persona?.firstMessage ?? "" }
   ]);
   const [isRecording, setIsRecording] = useState(false);
   const [showHint, setShowHint] = useState(true);
+  if (!persona) return null;
   
   const endChat = () => {
-    navigate(`/practice/result/${id}`);
+    navigate(`/practice/result/${id}${missionId ? `?missionId=${missionId}` : ""}`);
   };
 
   const handleRecord = () => {
     setIsRecording(true);
     setTimeout(() => {
       setIsRecording(false);
-      setMessages(prev => [...prev, { role: "user", text: "Ibu, untuk kulit sensitif kami punya..." }]);
+      setMessages(prev => [...prev, { role: "user", text: persona.sampleReply }]);
       
       setTimeout(() => {
         setMessages(prev => [...prev, { 
           role: "ai", 
-          text: "Hmm tapi saya pernah coba brand X dan malah tambah merah. Bedanya apa dengan produk ini?\n(嗯但我之前用过X品牌反而更红了。这个产品和那个有什么区别？)" 
+          text: persona.followUpMessage
         }]);
       }, 1000);
     }, 2000);
@@ -42,7 +48,7 @@ export function AIPracticeChat() {
           <ArrowLeft size={20} />
         </button>
         <div className="flex-1 text-center pr-8">
-          <span className="bg-rose-50 text-rose-600 border border-rose-100 text-[10px] px-2 py-0.5 rounded-full font-bold ml-2 shadow-sm">敏感肌场景</span>
+          <span className="bg-rose-50 text-rose-600 border border-rose-100 text-[10px] px-2 py-0.5 rounded-full font-bold ml-2 shadow-sm">{persona.sceneLabel}</span>
         </div>
         <button onClick={endChat} className="text-[11px] text-rose-500 font-bold bg-rose-50 px-3 py-1.5 rounded-lg border border-rose-100">
           Finish
@@ -52,9 +58,9 @@ export function AIPracticeChat() {
       {/* Persona Header */}
       <div className="flex flex-col items-center py-5 bg-white/40 backdrop-blur-sm border-b border-rose-100 shadow-sm relative z-10">
         <div className="w-16 h-16 rounded-full border-2 border-white shadow-md overflow-hidden bg-rose-50">
-           <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Sarah" alt="AI" className="w-full h-full object-cover" />
+           <img src={persona.portraitImage ?? `https://api.dicebear.com/7.x/avataaars/svg?seed=${persona.avatarSeed}`} alt="AI" className="w-full h-full object-cover" />
         </div>
-        <h2 className="font-black text-gray-800 mt-2 text-sm tracking-tight">Ibu Sarah, 35y</h2>
+        <h2 className="font-black text-gray-800 mt-2 text-sm tracking-tight">{persona.customerName}, {persona.age}y</h2>
         <div className="text-[10px] font-bold text-gray-500 mt-1 flex items-center gap-1.5 bg-white/80 px-2 py-0.5 rounded-full shadow-sm">
           <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse shadow-[0_0_4px_rgba(34,197,94,0.6)]"></span>
           Listening
@@ -67,7 +73,7 @@ export function AIPracticeChat() {
           <div key={i} className={`flex gap-3 max-w-[85%] ${msg.role === "user" ? "ml-auto flex-row-reverse" : ""}`}>
             {msg.role === "ai" && (
               <div className="w-8 h-8 rounded-full flex-shrink-0 shadow-sm overflow-hidden border border-rose-100 bg-white">
-                 <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Sarah" alt="Avatar" className="w-full h-full object-cover" />
+                 <img src={persona.portraitImage ?? `https://api.dicebear.com/7.x/avataaars/svg?seed=${persona.avatarSeed}`} alt="Avatar" className="w-full h-full object-cover" />
               </div>
             )}
             <div className={`p-4 text-sm shadow-sm leading-relaxed ${
@@ -88,7 +94,7 @@ export function AIPracticeChat() {
             <div className="flex items-start gap-2">
               <Lightbulb size={16} className="text-rose-500 flex-shrink-0 mt-0.5" />
               <p className="text-[11px] text-gray-600 leading-relaxed">
-                <span className="font-bold text-rose-600 mr-1">Hint:</span>先同理顾客的心情，讲解本产品核心成分为【积雪草】，与X品牌的成分不同，主打温和修护。
+                <span className="font-bold text-rose-600 mr-1">Hint:</span>{persona.hint}
               </p>
             </div>
           </div>

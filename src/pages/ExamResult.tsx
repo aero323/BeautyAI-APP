@@ -1,9 +1,20 @@
-import { useNavigate } from "react-router-dom";
+import { useEffect } from "react";
+import { useNavigate, useParams } from "react-router-dom";
 import { CheckCircle, XCircle, ArrowLeft } from "lucide-react";
 import { cn } from "../lib/utils";
+import { useMockAuth } from "../context/MockAuthContext";
 
 export function ExamResult() {
   const navigate = useNavigate();
+  const { id } = useParams();
+  const { regionData, recordCompletion } = useMockAuth();
+  const exam = regionData?.exams.find(item => String(item.id) === id) ?? regionData?.exams[0];
+  useEffect(() => {
+    if (exam) {
+      recordCompletion("exam", exam.id);
+    }
+  }, [recordCompletion, exam]);
+  if (!exam) return null;
 
   return (
     <div className="flex flex-col min-h-screen bg-background pb-8">
@@ -29,6 +40,7 @@ export function ExamResult() {
           </div>
           
           <h2 className="font-black text-gray-800 mt-8 text-2xl relative z-10">Excellent! 🏆</h2>
+          <p className="text-[11px] text-gray-400 font-bold mt-2 relative z-10">{exam.title}</p>
           <div className="flex gap-4 mt-4 relative z-10">
             <span className="text-[11px] font-bold text-gray-500 bg-gray-50 px-3 py-1 rounded-md border border-gray-100">Time: <span className="text-gray-800">22:15</span></span>
             <span className="text-[11px] font-bold text-indigo-600 bg-indigo-50 px-3 py-1 rounded-md border border-indigo-100 flex items-center gap-1">

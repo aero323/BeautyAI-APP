@@ -1,24 +1,30 @@
 import { useState } from "react";
 import { useNavigate, useParams, useSearchParams } from "react-router-dom";
-import { Mic, ArrowLeft, Lightbulb, Settings, Navigation } from "lucide-react";
+import { Mic, ArrowLeft, Lightbulb, Navigation } from "lucide-react";
+import { useMockAuth } from "../context/MockAuthContext";
 
 export function ScriptPractice() {
   const navigate = useNavigate();
   const { id } = useParams();
   const [searchParams] = useSearchParams();
   const hasHint = searchParams.get("hint") === "true";
+  const missionId = searchParams.get("missionId");
+  const { regionData } = useMockAuth();
+  const scenario = regionData?.scenarios.find(item => String(item.id) === id) ?? regionData?.scenarios[0];
   
   const [messages, setMessages] = useState([
-    { role: "ai", text: "你好，我想看看有没有适合夏天用的清爽一点的精华。" }
+    { role: "ai", text: scenario?.firstMessage ?? "" }
   ]);
   const [isRecording, setIsRecording] = useState(false);
   const [currentStep, setCurrentStep] = useState(1);
+  const [showHint, setShowHint] = useState(hasHint);
   const totalSteps = 6;
-  
-  const finishScenario = () => {
-    navigate(`/script/result/${id}`);
-  };
+  if (!scenario) return null;
 
+  const endScript = () => {
+    navigate(`/script/result/${id}${missionId ? `?missionId=${missionId}` : ""}`);
+  };
+  
   const handleRecord = () => {
     setIsRecording(true);
     setTimeout(() => {
@@ -28,7 +34,7 @@ export function ScriptPractice() {
       setTimeout(() => {
         setMessages(prev => [...prev, { 
           role: "ai", 
-          text: "我是混合偏干的，但夏天T区比较容易出油。" 
+          text: scenario.followUpMessage
         }]);
         setCurrentStep(prev => Math.min(prev + 1, totalSteps));
       }, 1000);
@@ -45,9 +51,9 @@ export function ScriptPractice() {
           <ArrowLeft size={20} />
         </button>
         <div className="flex-1 text-center pr-8">
-          <span className="font-bold text-sm tracking-tight text-gray-800">XX精华液场景演练</span>
+          <span className="font-bold text-sm tracking-tight text-gray-800">{scenario.title}</span>
         </div>
-        <button onClick={finishScenario} className="text-[11px] text-indigo-500 font-bold bg-indigo-50 px-3 py-1.5 rounded-lg border border-indigo-100">
+        <button onClick={endScript} className="text-[11px] text-rose-500 font-bold bg-rose-50 px-3 py-1.5 rounded-lg border border-rose-100">
           Finish
         </button>
       </div>
@@ -63,6 +69,17 @@ export function ScriptPractice() {
 
       {/* Chat Area */}
       <div className="flex-1 overflow-y-auto p-6 space-y-5 z-10 pb-24">
+        {showHint && (
+          <div className="rounded-[24px] border border-indigo-100 bg-indigo-50/70 p-4 shadow-sm">
+            <div className="flex items-start gap-2">
+              <Lightbulb size={16} className="text-indigo-500 flex-shrink-0 mt-0.5" />
+              <p className="text-[11px] text-indigo-700 leading-relaxed">
+                <span className="font-bold text-indigo-600 mr-1">Hint:</span>{scenario.hintKeywords}
+              </p>
+            </div>
+          </div>
+        )}
+
         {messages.map((msg, i) => (
           <div key={i} className={`flex gap-3 max-w-[85%] ${msg.role === "user" ? "ml-auto flex-row-reverse" : ""}`}>
             {msg.role === "ai" && (
@@ -83,17 +100,6 @@ export function ScriptPractice() {
 
       {/* Hints & Actions */}
       <div className="absolute bottom-0 left-0 right-0 bg-white rounded-t-[32px] shadow-[0_-8px_30px_rgba(99,102,241,0.06)] z-20 pb-safe">
-        {hasHint && messages[messages.length-1]?.role === "ai" && (
-          <div className="px-6 py-4 bg-indigo-50/50 rounded-t-[32px] border-b border-indigo-50/30">
-            <div className="flex items-start gap-2">
-              <Lightbulb size={16} className="text-indigo-500 flex-shrink-0 mt-0.5" />
-              <p className="text-[11px] text-indigo-700 font-medium leading-relaxed">
-                <span className="font-bold text-indigo-600 mr-1">💡 关键词：</span>肤质类型 / 使用习惯 / 期望效果
-              </p>
-            </div>
-          </div>
-        )}
-        
         <div className="p-6 flex flex-col items-center justify-center gap-5">
           <button 
             onMouseDown={handleRecord}
@@ -110,9 +116,16 @@ export function ScriptPractice() {
           </button>
           
           <div className="flex w-full justify-between items-center px-4 mt-2">
-             <span className="text-[10px] font-bold text-gray-400 tracking-widest uppercase mx-auto">
+            <button 
+              onClick={() => setShowHint(prev => !prev)}
+              className={`flex items-center gap-1.5 text-[11px] font-bold ${showHint ? 'text-indigo-500 bg-indigo-50 px-3 py-1.5 rounded-full' : 'text-gray-400'}`}
+            >
+              <Lightbulb size={14} /> {showHint ? 'Hide Hint' : 'Show Hint'}
+            </button>
+            <span className="text-[10px] font-bold text-gray-400 tracking-widest uppercase mx-auto">
               {isRecording ? "Release Send" : "Hold to Reply"}
             </span>
+            <div className="w-[72px]" />
           </div>
         </div>
       </div>
