@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate, useParams, useSearchParams } from "react-router-dom";
-import { Mic, ArrowLeft, Lightbulb, Settings } from "lucide-react";
+import { Mic, ArrowLeft, Lightbulb } from "lucide-react";
 import { useMockAuth } from "../context/MockAuthContext";
 
 export function AIPracticeChat() {
@@ -56,14 +56,21 @@ export function AIPracticeChat() {
       </div>
 
       {/* Persona Header */}
-      <div className="flex flex-col items-center py-5 bg-white/40 backdrop-blur-sm border-b border-rose-100 shadow-sm relative z-10">
-        <div className="w-16 h-16 rounded-full border-2 border-white shadow-md overflow-hidden bg-rose-50">
-           <img src={persona.portraitImage ?? `https://api.dicebear.com/7.x/avataaars/svg?seed=${persona.avatarSeed}`} alt="AI" className="w-full h-full object-cover" />
-        </div>
-        <h2 className="font-black text-gray-800 mt-2 text-sm tracking-tight">{persona.customerName}, {persona.age}y</h2>
-        <div className="text-[10px] font-bold text-gray-500 mt-1 flex items-center gap-1.5 bg-white/80 px-2 py-0.5 rounded-full shadow-sm">
-          <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse shadow-[0_0_4px_rgba(34,197,94,0.6)]"></span>
-          Listening
+      <div className="flex flex-col bg-white/40 backdrop-blur-sm border-b border-rose-100 shadow-sm relative z-10">
+        <div className="relative w-full h-56 sm:h-64 overflow-hidden bg-rose-50">
+          <img
+            src={persona.portraitImage ?? `https://api.dicebear.com/7.x/avataaars/svg?seed=${persona.avatarSeed}`}
+            alt="AI"
+            className="absolute inset-0 w-full h-full object-cover object-top"
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/35 via-black/10 to-transparent"></div>
+          <div className="absolute bottom-0 left-0 right-0 p-4 flex flex-col items-center">
+            <h2 className="font-black text-white text-sm tracking-tight drop-shadow">{persona.customerName}, {persona.age}y</h2>
+            <div className="text-[10px] font-bold text-white/90 mt-1 flex items-center gap-1.5 bg-black/20 px-2 py-0.5 rounded-full backdrop-blur-sm">
+              <span className="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse shadow-[0_0_4px_rgba(74,222,128,0.8)]"></span>
+              Listening
+            </div>
+          </div>
         </div>
       </div>
 
@@ -125,9 +132,6 @@ export function AIPracticeChat() {
             <span className="text-[11px] font-bold text-gray-400 tracking-widest uppercase">
               {isRecording ? "Release Send" : "Hold to Speak"}
             </span>
-            <button className="flex items-center gap-1.5 text-[11px] font-bold text-gray-400 bg-gray-50 px-3 py-1.5 rounded-full">
-              <Settings size={14} /> Mode
-            </button>
           </div>
         </div>
       </div>

@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState, type TouchEvent } from "react";
-import { ArrowLeft, ChevronUp, Mic, Play, Package, Tag, BookOpen } from "lucide-react";
+import { ArrowLeft, ChevronUp, Mic, Play, Package, Tag } from "lucide-react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { AnimatePresence, motion } from "motion/react";
 import { useMockAuth } from "../context/MockAuthContext";
@@ -149,7 +149,6 @@ export function SentenceReading() {
               </div>
 
               <div>
-                <p className="text-[11px] font-bold text-gray-400 mb-2 flex items-center gap-1.5"><BookOpen size={12} /> 金句内容</p>
                 <p className="text-xl font-black leading-relaxed italic text-gray-800">{currentProduct.quote}</p>
               </div>
 
