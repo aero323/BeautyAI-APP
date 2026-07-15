@@ -9,6 +9,10 @@ export function ExamResult() {
   const { id } = useParams();
   const { regionData, recordCompletion } = useMockAuth();
   const exam = regionData?.exams.find(item => String(item.id) === id) ?? regionData?.exams[0];
+  const questionCount = exam?.items?.length ?? exam?.questions ?? 0;
+  const correctCount = questionCount > 0 ? Math.max(questionCount - 1, 0) : 0;
+  const score = questionCount > 0 ? Math.round((correctCount / questionCount) * 100) : 0;
+
   useEffect(() => {
     if (exam) {
       recordCompletion("exam", exam.id);
@@ -32,9 +36,9 @@ export function ExamResult() {
            <div className="absolute bottom-0 left-0 w-24 h-24 bg-pink-50 rounded-full -translate-x-10 translate-y-10"></div>
           
           <div className="relative z-10">
-            <div className={`w-32 h-32 rounded-[32px] border-8 flex items-center justify-center rotate-3 border-indigo-50 bg-white shadow-sm`}>
+          <div className={`w-32 h-32 rounded-[32px] border-8 flex items-center justify-center rotate-3 border-indigo-50 bg-white shadow-sm`}>
               <div className="-rotate-3 flex flex-col items-center">
-                 <span className={`text-5xl font-black text-indigo-500 tracking-tighter`}>85</span>
+                 <span className={`text-5xl font-black text-indigo-500 tracking-tighter`}>{score}</span>
               </div>
             </div>
           </div>
@@ -55,14 +59,14 @@ export function ExamResult() {
 
         {/* Answer Breakdown */}
         <div className="bg-white rounded-[32px] p-6 shadow-sm border border-pink-100">
-          <h3 className="font-bold text-gray-800 border-b border-pink-50 pb-3 mb-4">Question Breakdown <span className="text-gray-500 text-xs font-medium ml-2">(17/20)</span></h3>
+          <h3 className="font-bold text-gray-800 border-b border-pink-50 pb-3 mb-4">Question Breakdown <span className="text-gray-500 text-xs font-medium ml-2">({correctCount}/{questionCount})</span></h3>
           <div className="grid grid-cols-5 gap-3">
-            {Array.from({length: 20}).map((_, i) => (
+            {Array.from({length: questionCount}).map((_, i) => (
               <div 
                 key={i} 
                 className={cn(
                   "aspect-square rounded-2xl flex items-center justify-center text-xs font-bold shadow-sm",
-                  i === 3 || i === 7 || i === 12 
+                  i === Math.min(3, questionCount - 1)
                     ? "bg-red-50 text-red-500 border border-red-100" 
                     : "bg-green-50 text-green-600 border border-green-100"
                 )}

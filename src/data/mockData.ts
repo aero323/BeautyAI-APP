@@ -96,10 +96,83 @@ export interface ExamItem {
   date: string;
   score?: number;
   topic: string;
-  question: string;
+  question?: string;
+  options?: string[];
+  answerIndex?: number;
+  items?: ExamQuestion[];
+}
+
+export type ExamQuestionType =
+  | "single_choice"
+  | "multiple_choice"
+  | "true_false"
+  | "paragraph"
+  | "dropdown"
+  | "sorting"
+  | "matrix"
+  | "file_upload";
+
+export interface ExamQuestionBase {
+  id: string;
+  type: ExamQuestionType;
+  topic: string;
+  prompt: string;
+  helperText?: string;
+}
+
+export interface SingleChoiceExamQuestion extends ExamQuestionBase {
+  type: "single_choice";
   options: string[];
   answerIndex: number;
 }
+
+export interface MultipleChoiceExamQuestion extends ExamQuestionBase {
+  type: "multiple_choice";
+  options: string[];
+  answerIndexes: number[];
+}
+
+export interface TrueFalseExamQuestion extends ExamQuestionBase {
+  type: "true_false";
+  answer: boolean;
+}
+
+export interface ParagraphExamQuestion extends ExamQuestionBase {
+  type: "paragraph";
+  placeholder?: string;
+}
+
+export interface DropdownExamQuestion extends ExamQuestionBase {
+  type: "dropdown";
+  options: string[];
+  answerIndex: number;
+}
+
+export interface SortingExamQuestion extends ExamQuestionBase {
+  type: "sorting";
+  items: string[];
+}
+
+export interface MatrixExamQuestion extends ExamQuestionBase {
+  type: "matrix";
+  rows: string[];
+  columns: string[];
+}
+
+export interface FileUploadExamQuestion extends ExamQuestionBase {
+  type: "file_upload";
+  accept?: string;
+}
+
+export type ExamQuestion =
+  | SingleChoiceExamQuestion
+  | MultipleChoiceExamQuestion
+  | TrueFalseExamQuestion
+  | ParagraphExamQuestion
+  | DropdownExamQuestion
+  | SortingExamQuestion
+  | MatrixExamQuestion
+  | FileUploadExamQuestion;
 
 export interface SentenceItem {
   id: number;
@@ -174,6 +247,152 @@ export const mockUsers: MockUser[] = [
     avatarUrl: "https://api.dicebear.com/7.x/avataaars/svg?seed=Rani"
   }
 ];
+
+function createJakartaExamQuestions(): ExamQuestion[] {
+  return [
+    {
+      id: "jakarta-q1",
+      type: "single_choice",
+      topic: "Ingredients",
+      prompt: "新款烟酰胺美白精华的核心成分浓度是多少？它在什么时间内可以达到明显的提亮效果？",
+      options: ["3% 烟酰胺，4周内提亮", "5% 烟酰胺，2周内提亮", "10% 烟酰胺，1周内提亮", "2% 烟酰胺，8周内提亮"],
+      answerIndex: 1
+    },
+    {
+      id: "jakarta-q2",
+      type: "multiple_choice",
+      topic: "Claims",
+      prompt: "关于这款精华，以下哪些说法可以一起讲给顾客？",
+      helperText: "可多选，适合把卖点讲完整。",
+      options: ["3% 烟酰胺有助提亮", "建议搭配防晒", "可以直接替代洁面", "适合持续使用观察 2-4 周"],
+      answerIndexes: [0, 1, 3]
+    },
+    {
+      id: "jakarta-q3",
+      type: "true_false",
+      topic: "Ingredients",
+      prompt: "判断：烟酰胺精华越高浓度就一定越适合所有顾客。",
+      answer: false
+    },
+    {
+      id: "jakarta-q4",
+      type: "paragraph",
+      topic: "Explanation",
+      prompt: "请用 1-2 句话向顾客解释，为什么 3% 烟酰胺更适合敏感肌入门。",
+      placeholder: "请输入简短说明..."
+    },
+    {
+      id: "jakarta-q5",
+      type: "dropdown",
+      topic: "Consultation",
+      prompt: "如果顾客追问提亮周期，最稳妥的回答是：",
+      options: ["1 周内立刻显白", "2-4 周逐步感知肤色更匀亮", "必须 8 周才会有任何变化", "不建议说明时间"],
+      answerIndex: 1
+    },
+    {
+      id: "jakarta-q6",
+      type: "sorting",
+      topic: "Consultation",
+      prompt: "请按正确顺序排列推荐流程。",
+      items: [
+        "先询问肤质和耐受度",
+        "再介绍 3% 烟酰胺的提亮逻辑",
+        "接着提醒搭配防晒",
+        "最后建议连续使用并观察变化"
+      ]
+    },
+    {
+      id: "jakarta-q7",
+      type: "matrix",
+      topic: "Scenarios",
+      prompt: "请勾选每个场景最合适的处理方式。",
+      helperText: "每一行都可以勾选一个或多个选项。",
+      rows: ["敏感肌顾客", "明显暗沉顾客", "皮肤破损泛红", "想加强白天防护"],
+      columns: ["可以推荐", "先做耐受观察", "先提醒防晒"]
+    },
+    {
+      id: "jakarta-q8",
+      type: "file_upload",
+      topic: "Submission",
+      prompt: "请上传一份本题的顾客沟通记录或培训截图。",
+      helperText: "支持 PDF、PNG、JPG。",
+      accept: ".pdf,.png,.jpg,.jpeg"
+    }
+  ];
+}
+
+function createSurabayaExamQuestions(): ExamQuestion[] {
+  return [
+    {
+      id: "surabaya-q1",
+      type: "single_choice",
+      topic: "Barrier Repair",
+      prompt: "泗水湿热天气下，推荐屏障修护产品时应优先强调哪一点？",
+      options: ["厚重封闭感", "清爽质地和修护屏障", "强力磨砂", "只强调香味"],
+      answerIndex: 1
+    },
+    {
+      id: "surabaya-q2",
+      type: "multiple_choice",
+      topic: "Claims",
+      prompt: "关于泗水这款屏障修护产品，哪些卖点适合一起讲？",
+      helperText: "可多选，重点放在湿热场景。",
+      options: ["轻薄凝露质地", "有助修护肌肤屏障", "更适合厚涂闷敷", "白天通勤也能接受"],
+      answerIndexes: [0, 1, 3]
+    },
+    {
+      id: "surabaya-q3",
+      type: "true_false",
+      topic: "Weather",
+      prompt: "判断：在泗水湿热天气里，厚重封闭感一定比清爽质地更受欢迎。",
+      answer: false
+    },
+    {
+      id: "surabaya-q4",
+      type: "paragraph",
+      topic: "Explanation",
+      prompt: "请用 1-2 句话解释，为什么神经酰胺在晒后修护沟通里很重要。",
+      placeholder: "请输入简短说明..."
+    },
+    {
+      id: "surabaya-q5",
+      type: "dropdown",
+      topic: "Consultation",
+      prompt: "当顾客担心闷痘时，最优先强调的搭配是：",
+      options: ["厚重面霜 + 油膏", "轻薄凝露 + 分层补水", "强力磨砂 + 高频清洁", "只谈香味舒适度"],
+      answerIndex: 1
+    },
+    {
+      id: "surabaya-q6",
+      type: "sorting",
+      topic: "Consultation",
+      prompt: "请按正确顺序排列推荐流程。",
+      items: [
+        "先确认晒后泛红和通勤环境",
+        "再讲神经酰胺的屏障修护逻辑",
+        "接着强调清爽不闷的质地",
+        "最后建议白天坚持使用并配合防晒"
+      ]
+    },
+    {
+      id: "surabaya-q7",
+      type: "matrix",
+      topic: "Scenarios",
+      prompt: "请勾选每个场景最合适的处理方式。",
+      helperText: "每一行都可以勾选一个或多个选项。",
+      rows: ["湿热通勤", "晒后泛红", "痘肌闭口", "妆前使用"],
+      columns: ["可以推荐", "先观察耐受", "先建议避开厚涂"]
+    },
+    {
+      id: "surabaya-q8",
+      type: "file_upload",
+      topic: "Submission",
+      prompt: "请上传一份泗水大区屏障修护培训记录。",
+      helperText: "支持 PDF、PNG、JPG。",
+      accept: ".pdf,.png,.jpg,.jpeg"
+    }
+  ];
+}
 
 export const regionData: Record<RegionId, RegionDataset> = {
   jakarta: {
@@ -298,13 +517,14 @@ export const regionData: Record<RegionId, RegionDataset> = {
         id: 1,
         title: "夏季防晒新品知识考核",
         status: "pending",
-        questions: 20,
+        questions: 8,
         time: "30分钟",
         date: "截止: 2024-06-30",
         topic: "Ingredients",
         question: "新款烟酰胺美白精华的核心成分浓度是多少？它在什么时间内可以达到明显的提亮效果？",
         options: ["3% 烟酰胺，4周内提亮", "5% 烟酰胺，2周内提亮", "10% 烟酰胺，1周内提亮", "2% 烟酰胺，8周内提亮"],
-        answerIndex: 1
+        answerIndex: 1,
+        items: createJakartaExamQuestions()
       },
       {
         id: 2,
@@ -509,13 +729,14 @@ export const regionData: Record<RegionId, RegionDataset> = {
         id: 11,
         title: "泗水大区屏障修护知识考核",
         status: "pending",
-        questions: 15,
+        questions: 8,
         time: "20分钟",
         date: "截止: 2024-07-05",
         topic: "Barrier Repair",
         question: "泗水湿热天气下，推荐屏障修护产品时应优先强调哪一点？",
         options: ["厚重封闭感", "清爽质地和修护屏障", "强力磨砂", "只强调香味"],
-        answerIndex: 1
+        answerIndex: 1,
+        items: createSurabayaExamQuestions()
       },
       {
         id: 12,
