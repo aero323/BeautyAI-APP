@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { CheckCircle2, ClipboardList, BookOpen, MessageSquare, Timer, ChevronRight } from "lucide-react";
+import { Camera, CheckCircle2, ClipboardList, BookOpen, MessageSquare, Timer, ChevronRight } from "lucide-react";
 import { useMockAuth } from "../context/MockAuthContext";
 import type { Mission } from "../data/mockData";
 import { getMissionTagLabels } from "../lib/missionLabels";
@@ -10,6 +10,7 @@ export function Home() {
   if (!user || !regionData) return null;
   const sortedMissions = sortMissionsForToday(missions);
   const avatarSrc = user.avatarUrl ?? `https://api.dicebear.com/7.x/avataaars/svg?seed=${user.avatarSeed}`;
+  const photoCheckinDone = isPhotoCheckinDone(user.id);
 
   return (
     <div className="flex flex-col min-h-full bg-background pb-6">
@@ -40,6 +41,8 @@ export function Home() {
           </Link>
         </div>
 
+        <DailyCheckinBanner completed={photoCheckinDone} />
+
         {/* Task Inbox */}
         <section>
           <div className="mb-3">
@@ -53,6 +56,40 @@ export function Home() {
       </div>
     </div>
   );
+}
+
+function DailyCheckinBanner({ completed }: { completed: boolean }) {
+  return (
+    <Link
+      to="/daily-checkin"
+      className={`group flex items-center gap-3 rounded-[22px] border p-3.5 shadow-sm transition-all hover:shadow-md ${
+        completed
+          ? "border-emerald-100 bg-emerald-50/60 hover:border-emerald-200"
+          : "border-violet-100 bg-white hover:border-violet-200"
+      }`}
+    >
+      <span className={`flex h-11 w-11 flex-none items-center justify-center rounded-2xl ${completed ? "bg-emerald-100 text-emerald-600" : "bg-violet-50 text-violet-500"}`}>
+        {completed ? <CheckCircle2 size={21} /> : <Camera size={21} />}
+      </span>
+      <span className="min-w-0 flex-1">
+        <span className="flex items-center gap-2">
+          <strong className={`truncate text-sm font-black ${completed ? "text-emerald-800" : "text-gray-900"}`}>BA 每日拍照打卡</strong>
+          <span className={`flex-none rounded-full px-2 py-0.5 text-[9px] font-bold ${completed ? "bg-emerald-100 text-emerald-700" : "bg-violet-50 text-violet-600"}`}>
+            {completed ? "已完成" : "今日待打卡"}
+          </span>
+        </span>
+        <span className={`mt-1 block truncate text-[11px] font-medium ${completed ? "text-emerald-700/80" : "text-gray-500"}`}>
+          {completed ? "妆容照与柜台出样照已提交" : "妆容照 + 柜台出样照，一次完成"}
+        </span>
+      </span>
+      <ChevronRight size={18} className={completed ? "text-emerald-400" : "text-gray-300"} />
+    </Link>
+  );
+}
+
+function isPhotoCheckinDone(userId: string) {
+  const dateKey = new Date().toISOString().slice(0, 10);
+  return window.localStorage.getItem(`beautyai.photoCheckin.${userId}.${dateKey}`) === "submitted";
 }
 
 function TaskCard({ mission }: { key?: number; mission: Mission }) {

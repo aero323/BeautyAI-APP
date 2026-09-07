@@ -9,7 +9,7 @@ export default function MobileLayout() {
     "/practice/chat", "/practice/result", 
     "/script/chat", "/script/result",
     "/exam/run", "/exam/intro", "/exam/result",
-    "/reading"
+    "/reading", "/daily-checkin", "/photo-checkin"
   ];
   
   const shouldHideNav = hideNavPaths.some(path => location.pathname.startsWith(path));

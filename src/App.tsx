@@ -24,6 +24,7 @@ import { Profile } from "./pages/Profile";
 import { TaskList } from "./pages/TaskList";
 import { PracticeTaskDetail } from "./pages/PracticeTaskDetail";
 import { StudyTaskDetail } from "./pages/StudyTaskDetail";
+import { DailyPhotoCheckin } from "./pages/DailyPhotoCheckin";
 
 export default function App() {
   return (
@@ -43,8 +44,10 @@ function AppRoutes() {
   return (
     <BrowserRouter>
       <Routes>
-        <Route path="/" element={<MobileLayout />}>
+          <Route path="/" element={<MobileLayout />}>
           <Route index element={<Home />} />
+          <Route path="daily-checkin" element={<DailyPhotoCheckin />} />
+          <Route path="photo-checkin" element={<DailyPhotoCheckin />} />
           <Route path="practice" element={<AIPractice />} />
           <Route path="practice/chat/:id" element={<AIPracticeChat />} />
           <Route path="practice/result/:id" element={<AIPracticeResult />} />
