@@ -78,9 +78,6 @@ function DailyCheckinBanner({ completed }: { completed: boolean }) {
             {completed ? "已完成" : "今日待打卡"}
           </span>
         </span>
-        <span className={`mt-1 block truncate text-[11px] font-medium ${completed ? "text-emerald-700/80" : "text-gray-500"}`}>
-          {completed ? "妆容照与柜台出样照已提交" : "妆容照 + 柜台出样照，一次完成"}
-        </span>
       </span>
       <ChevronRight size={18} className={completed ? "text-emerald-400" : "text-gray-300"} />
     </Link>
