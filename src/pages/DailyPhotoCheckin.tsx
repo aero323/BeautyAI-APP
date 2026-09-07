@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState, type ChangeEvent, type ReactNode,
 import { ArrowLeft, Camera, Check, CheckCircle2, ImagePlus, Images, RotateCcw, UploadCloud, X } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useMockAuth } from "../context/MockAuthContext";
+import makeupPreviewImage from "../assets/checkin/muslim-ba-makeup-preview.png";
 
 type PhotoValue = {
   name: string;
@@ -13,11 +14,11 @@ type PhotoSlotProps = {
   description: string;
   photo: PhotoValue | null;
   cameraRef: RefObject<HTMLInputElement | null>;
-  albumRef: RefObject<HTMLInputElement | null>;
   onChoose: (event: ChangeEvent<HTMLInputElement>) => void;
   onRemove: () => void;
   capture: "user" | "environment";
   icon: ReactNode;
+  previewImage: string;
 };
 
 export function DailyPhotoCheckin() {
@@ -30,9 +31,7 @@ export function DailyPhotoCheckin() {
   const [error, setError] = useState("");
   const photoUrlsRef = useRef<{ makeup: string | null; counter: string | null }>({ makeup: null, counter: null });
   const makeupCameraRef = useRef<HTMLInputElement>(null);
-  const makeupAlbumRef = useRef<HTMLInputElement>(null);
   const counterCameraRef = useRef<HTMLInputElement>(null);
-  const counterAlbumRef = useRef<HTMLInputElement>(null);
 
   const dateLabel = useMemo(() => {
     return new Intl.DateTimeFormat("zh-CN", { month: "long", day: "numeric", weekday: "long" }).format(new Date());
@@ -182,11 +181,11 @@ export function DailyPhotoCheckin() {
           description="正面清晰露脸，光线自然"
           photo={makeupPhoto}
           cameraRef={makeupCameraRef}
-          albumRef={makeupAlbumRef}
           onChoose={event => updatePhoto("makeup", event)}
           onRemove={() => handleRemove("makeup")}
           capture="user"
           icon={<Camera size={18} />}
+          previewImage={makeupPreviewImage}
         />
 
         <PhotoSlot
@@ -194,11 +193,11 @@ export function DailyPhotoCheckin() {
           description="拍到完整陈列和整洁台面"
           photo={counterPhoto}
           cameraRef={counterCameraRef}
-          albumRef={counterAlbumRef}
           onChoose={event => updatePhoto("counter", event)}
           onRemove={() => handleRemove("counter")}
           capture="environment"
           icon={<ImagePlus size={18} />}
+          previewImage="https://images.unsplash.com/photo-1596462502278-27bfdc403348?auto=format&fit=crop&w=1200&q=85"
         />
 
         {error && (
@@ -226,7 +225,7 @@ export function DailyPhotoCheckin() {
   );
 }
 
-function PhotoSlot({ title, description, photo, cameraRef, albumRef, onChoose, onRemove, capture, icon }: PhotoSlotProps) {
+function PhotoSlot({ title, description, photo, cameraRef, onChoose, onRemove, capture, icon, previewImage }: PhotoSlotProps) {
   return (
     <section className="rounded-[24px] border border-pink-100 bg-white p-4 shadow-sm">
       <div className="flex items-center gap-3">
@@ -252,31 +251,26 @@ function PhotoSlot({ title, description, photo, cameraRef, albumRef, onChoose, o
           <span className="absolute inset-x-0 bottom-0 truncate bg-gradient-to-t from-black/60 to-transparent px-3 pb-2 pt-5 text-[10px] font-medium text-white">{photo.name}</span>
         </div>
       ) : (
-        <div className="mt-4 flex aspect-[16/10] flex-col items-center justify-center rounded-[18px] border border-dashed border-pink-200 bg-pink-50/40 text-center">
-          <span className="flex h-10 w-10 items-center justify-center rounded-2xl bg-white text-rose-400 shadow-sm"><Images size={19} /></span>
-          <p className="mt-2 text-xs font-bold text-gray-600">还没有添加照片</p>
-          <p className="mt-0.5 text-[10px] font-medium text-gray-400">支持 JPG、PNG</p>
+        <div className="relative mt-4 flex aspect-[16/10] items-center justify-center overflow-hidden rounded-[18px] border border-pink-100 bg-pink-50 text-center">
+          <img src={previewImage} alt={`${title}示例预览`} className="absolute inset-0 h-full w-full object-cover" />
+          <div className="relative flex flex-col items-center rounded-2xl bg-black/58 px-4 py-3 text-white shadow-lg backdrop-blur-sm">
+            <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-white/18"><Images size={17} /></span>
+            <p className="mt-1.5 text-xs font-black">还没有添加照片</p>
+            <p className="mt-0.5 text-[10px] font-medium text-white/75">支持 JPG、PNG</p>
+          </div>
         </div>
       )}
 
-      <div className="mt-3 grid grid-cols-2 gap-2">
+      <div className="mt-3">
         <button
           type="button"
           onClick={() => cameraRef.current?.click()}
-          className="flex h-11 items-center justify-center gap-2 rounded-2xl bg-rose-50 text-xs font-black text-rose-600 transition-colors hover:bg-rose-100"
+          className="flex h-11 w-full items-center justify-center gap-2 rounded-2xl bg-rose-50 text-xs font-black text-rose-600 transition-colors hover:bg-rose-100"
         >
           <Camera size={16} /> 拍照
         </button>
-        <button
-          type="button"
-          onClick={() => albumRef.current?.click()}
-          className="flex h-11 items-center justify-center gap-2 rounded-2xl bg-gray-50 text-xs font-black text-gray-700 transition-colors hover:bg-gray-100"
-        >
-          <ImagePlus size={16} /> 相册
-        </button>
       </div>
       <input ref={cameraRef} type="file" accept="image/*" capture={capture} className="hidden" aria-label={`${title}使用相机拍摄`} onChange={onChoose} />
-      <input ref={albumRef} type="file" accept="image/*" className="hidden" aria-label={`${title}从相册选择`} onChange={onChoose} />
     </section>
   );
 }
