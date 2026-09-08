@@ -4,6 +4,7 @@ import { useMockAuth } from "../context/MockAuthContext";
 import type { Mission } from "../data/mockData";
 import { getMissionTagLabels } from "../lib/missionLabels";
 import { sortMissionsForToday } from "../lib/missionSort";
+import { checkinStorageKey } from "../lib/photoCheckin";
 
 export function Home() {
   const { user, regionData, missions } = useMockAuth();
@@ -85,8 +86,7 @@ function DailyCheckinBanner({ completed }: { completed: boolean }) {
 }
 
 function isPhotoCheckinDone(userId: string) {
-  const dateKey = new Date().toISOString().slice(0, 10);
-  return window.localStorage.getItem(`beautyai.photoCheckin.${userId}.${dateKey}`) === "submitted";
+  return window.localStorage.getItem(checkinStorageKey(userId)) === "submitted";
 }
 
 function TaskCard({ mission }: { key?: number; mission: Mission }) {

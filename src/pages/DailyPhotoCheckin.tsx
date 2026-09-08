@@ -3,6 +3,7 @@ import { ArrowLeft, Camera, Check, CheckCircle2, ImagePlus, Images, RotateCcw, U
 import { useNavigate } from "react-router-dom";
 import { useMockAuth } from "../context/MockAuthContext";
 import makeupPreviewImage from "../assets/checkin/muslim-ba-makeup-preview.png";
+import { checkinDateKey, checkinStorageKey, createCheckinPreview, readCheckinReport } from "../lib/photoCheckin";
 
 type PhotoValue = {
   name: string;
@@ -32,6 +33,8 @@ export function DailyPhotoCheckin() {
   const photoUrlsRef = useRef<{ makeup: string | null; counter: string | null }>({ makeup: null, counter: null });
   const makeupCameraRef = useRef<HTMLInputElement>(null);
   const counterCameraRef = useRef<HTMLInputElement>(null);
+  const activeRef = useRef(true);
+  const submittingRef = useRef(false);
 
   const dateLabel = useMemo(() => {
     return new Intl.DateTimeFormat("zh-CN", { month: "long", day: "numeric", weekday: "long" }).format(new Date());
@@ -45,7 +48,9 @@ export function DailyPhotoCheckin() {
   }, [counterPhoto, makeupPhoto]);
 
   useEffect(() => {
+    activeRef.current = true;
     return () => {
+      activeRef.current = false;
       // Object URLs are local previews; release them when the screen leaves.
       if (photoUrlsRef.current.makeup) URL.revokeObjectURL(photoUrlsRef.current.makeup);
       if (photoUrlsRef.current.counter) URL.revokeObjectURL(photoUrlsRef.current.counter);
@@ -82,18 +87,32 @@ export function DailyPhotoCheckin() {
     setError("");
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
+    if (submittingRef.current) return;
     if (!makeupPhoto || !counterPhoto) {
       setError("请先准备妆容照和柜台出样照，两张一起提交。");
       return;
     }
+    submittingRef.current = true;
     setSubmitting(true);
-    window.setTimeout(() => {
+    setError("");
+    try {
+      const [photos] = await Promise.all([
+        Promise.all([createCheckinPreview(makeupPhoto), createCheckinPreview(counterPhoto)]),
+        new Promise(resolve => window.setTimeout(resolve, 900))
+      ]);
+      if (!activeRef.current) return;
+      sessionStorage.setItem(`beautyai.checkinReport.${user.id}`, JSON.stringify({
+        date: checkinDateKey(), submittedAt: new Date().toISOString(), photos
+      }));
       window.localStorage.setItem(checkinStorageKey(user.id), "submitted");
-      setSubmitted(true);
-      setSubmitting(false);
-      setError("");
-    }, 550);
+      navigate("/daily-checkin/result", { replace: true });
+    } catch {
+      if (activeRef.current) setError("提交未完成，请检查照片或浏览器存储空间后重试。");
+    } finally {
+      submittingRef.current = false;
+      if (activeRef.current) setSubmitting(false);
+    }
   };
 
   const handleEdit = () => {
@@ -157,6 +176,9 @@ export function DailyPhotoCheckin() {
             >
               <RotateCcw size={15} /> 重新编辑照片
             </button>
+            {readCheckinReport(user.id) && (
+              <button type="button" onClick={() => navigate("/daily-checkin/result")} className="mt-2 h-11 w-full rounded-2xl text-xs font-black text-emerald-700 hover:bg-emerald-100">查看 AI 评分</button>
+            )}
           </section>
         ) : (
           <section className="rounded-[26px] border border-violet-100 bg-white p-5 shadow-sm">
@@ -176,6 +198,7 @@ export function DailyPhotoCheckin() {
           </section>
         )}
 
+        <fieldset disabled={submitting} className="space-y-5 disabled:opacity-60">
         <PhotoSlot
           title="妆容照"
           description="正面清晰露脸，光线自然"
@@ -199,6 +222,7 @@ export function DailyPhotoCheckin() {
           icon={<ImagePlus size={18} />}
           previewImage="https://images.unsplash.com/photo-1596462502278-27bfdc403348?auto=format&fit=crop&w=1200&q=85"
         />
+        </fieldset>
 
         {error && (
           <p role="alert" className="rounded-2xl border border-red-100 bg-red-50 px-4 py-3 text-xs font-bold leading-5 text-red-600">
@@ -214,7 +238,7 @@ export function DailyPhotoCheckin() {
               disabled={!canSubmit}
               className="flex h-12 w-full items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-pink-500 to-rose-400 text-sm font-black text-white shadow-lg shadow-rose-200 transition-all hover:shadow-xl disabled:cursor-not-allowed disabled:opacity-45 disabled:shadow-none"
             >
-              {submitting ? "正在提交…" : `提交今日打卡 · ${photoCount}/2`}
+              {submitting ? "AI 正在评分…" : `提交今日打卡 · ${photoCount}/2`}
               {!submitting && <Check size={17} />}
             </button>
             <p className="mt-2 text-center text-[10px] font-medium text-gray-400">两张照片都准备好后，才能一起提交</p>
@@ -284,18 +308,6 @@ function Requirement({ label, done }: { label: string; done: boolean }) {
       <span className={`truncate text-[11px] font-bold ${done ? "text-emerald-700" : "text-gray-500"}`}>{label}</span>
     </div>
   );
-}
-
-function dateKey() {
-  const now = new Date();
-  const year = now.getFullYear();
-  const month = String(now.getMonth() + 1).padStart(2, "0");
-  const day = String(now.getDate()).padStart(2, "0");
-  return `${year}-${month}-${day}`;
-}
-
-function checkinStorageKey(userId: string) {
-  return `beautyai.photoCheckin.${userId}.${dateKey()}`;
 }
 
 function readCheckin(userId: string) {
