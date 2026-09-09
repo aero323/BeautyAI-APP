@@ -15,7 +15,7 @@ export interface MockUser {
 export interface Mission {
   id: number;
   title: string;
-  type: "exam" | "course" | "practice";
+  type: "exam" | "course" | "practice" | "collection";
   dueText: string;
   route: string;
   sourceId: number;
@@ -38,6 +38,27 @@ export interface Mission {
   completedUnitIds?: MissionUnitId[];
   coverageCurrent?: number;
   coverageTarget?: number;
+  collectionTask?: CollectionTask;
+}
+
+export interface CollectionTask {
+  mediaType: "video" | "audio";
+  targetMode: "product" | "scene";
+  targetTitle: string;
+  targetVersion?: string;
+  targetDescription: string;
+  maxDurationSec: number;
+  maxFileSizeMb: number;
+  accept: string[];
+}
+
+export interface CollectionSubmission {
+  name: string;
+  mimeType: string;
+  size: number;
+  durationSec: number;
+  url: string;
+  submittedAt: string;
 }
 
 export type MissionUnitKind = "course" | "persona" | "scenario" | "sentence";
@@ -406,6 +427,7 @@ export const regionData: Record<RegionId, RegionDataset> = {
       { id: 3, title: "新品集中培训每日练习", type: "practice", dueText: "Tonight 23:59", route: "/tasks/practice/3", sourceId: 3001, status: "todo", sourceLabel: "总部", cycleLabel: "每日", progressCurrent: 0, progressTarget: 1, contentScope: "从指定练习池完成 1 次", allowSharedCredit: true, practiceTask: { personaIds: [1], scenarioIds: [1], sentenceIds: [1], coverageTarget: 0 } },
       { id: 4, title: "雅加达区域限定话术练习", type: "practice", dueText: "Sunday 23:59", route: "/tasks/practice/4", sourceId: 3002, status: "in_progress", sourceLabel: "雅加达大区", cycleLabel: "本周", progressCurrent: 1, progressTarget: 3, contentScope: "本周 3 次，覆盖 2 个必练单元", allowSharedCredit: true, practiceTask: { personaIds: [1], scenarioIds: [1], sentenceIds: [1, 2], coverageTarget: 2 }, completedUnitIds: [getPracticeUnitId("persona", 1)] },
       { id: 5, title: "敏感肌基础问候练习", type: "practice", dueText: "Completed today", route: "/tasks/practice/5", sourceId: 3003, status: "done", sourceLabel: "雅加达大区", cycleLabel: "每日", progressCurrent: 1, progressTarget: 1, contentScope: "已完成练习任务", practiceTask: { personaIds: [2], scenarioIds: [], sentenceIds: [], coverageTarget: 1 }, completedUnitIds: [getPracticeUnitId("persona", 2)], coverageCurrent: 1, coverageTarget: 1 }
+      ,{ id: 6, title: "优秀案例：急救舒缓精华柜台讲解", type: "collection", dueText: "周五 18:00 前", route: "/tasks/collection/6", sourceId: 4101, status: "todo", sourceLabel: "总部", cycleLabel: "一次性", progressCurrent: 0, progressTarget: 1, contentScope: "视频采集 · 指定产品", collectionTask: { mediaType: "video", targetMode: "product", targetTitle: "BS 急救舒缓精粹", targetVersion: "版本 2026.03", targetDescription: "高频次安抚敏感泛红，质地轻薄。请现场介绍核心卖点、适用肤质和推荐话术。", maxDurationSec: 300, maxFileSizeMb: 300, accept: ["video/mp4", "video/quicktime", "video/webm"] } }
     ],
     courses: [
       {
@@ -644,6 +666,7 @@ export const regionData: Record<RegionId, RegionDataset> = {
       { id: 11, title: "Barrier Repair Course", type: "course", dueText: "Due today", route: "/tasks/study/11", sourceId: 2011, status: "in_progress", sourceLabel: "泗水大区", cycleLabel: "今日", progressCurrent: 0, progressTarget: 2, contentScope: "2个必修课件", studyTask: { courseIds: [11, 12] } },
       { id: 12, title: "Humid Weather Consultation Drill", type: "practice", dueText: "Ends in: 5h 10m", route: "/tasks/practice/12", sourceId: 3012, status: "todo", sourceLabel: "泗水大区", cycleLabel: "本周", progressCurrent: 0, progressTarget: 2, contentScope: "本周 2 次，覆盖 2 个必练单元", practiceTask: { personaIds: [11], scenarioIds: [11], sentenceIds: [11, 12], coverageTarget: 2 } },
       { id: 13, title: "Surabaya Store Exam", type: "exam", dueText: "Due tomorrow", route: "/exam/intro/11", sourceId: 11, status: "todo", sourceLabel: "总部", cycleLabel: "一次性", progressCurrent: 0, progressTarget: 1, contentScope: "区域门店考核" }
+      ,{ id: 14, title: "优秀案例：湿热天气轻薄叠涂", type: "collection", dueText: "本周日 18:00 前", route: "/tasks/collection/14", sourceId: 4102, status: "todo", sourceLabel: "泗水大区", cycleLabel: "一次性", progressCurrent: 0, progressTarget: 1, contentScope: "音频采集 · 自定义场景", collectionTask: { mediaType: "audio", targetMode: "scene", targetTitle: "湿热天气下的轻薄叠涂", targetDescription: "请分享你在泗水门店为顾客演示轻薄叠涂的完整沟通过程和关键提醒。", maxDurationSec: 180, maxFileSizeMb: 100, accept: ["audio/mpeg", "audio/mp4", "audio/wav", "audio/webm"] } }
     ],
     courses: [
       {
@@ -873,6 +896,8 @@ export function getMissionCoverageTarget(mission: Mission) {
   if (mission.practiceTask) {
     return getMissionUnitIds(mission).length;
   }
+
+  if (mission.collectionTask) return 1;
 
   return 0;
 }
