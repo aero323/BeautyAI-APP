@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { BookOpen, CheckCircle2, ClipboardList, MessageSquare, Timer } from "lucide-react";
+import { BookOpen, Camera, CheckCircle2, ClipboardList, MessageSquare, Timer } from "lucide-react";
 import { useMockAuth } from "../context/MockAuthContext";
 import type { Mission } from "../data/mockData";
 import { getMissionTagLabels } from "../lib/missionLabels";
@@ -26,8 +26,8 @@ export function TaskList() {
 
 function TaskRow({ mission }: { key?: number; mission: Mission }) {
   const isDone = mission.status === "done";
-  const typeLabel = mission.type === "course" ? "学习任务" : mission.type === "practice" ? "练习任务" : "考试任务";
-  const icon = mission.type === "course" ? <BookOpen size={20} /> : mission.type === "practice" ? <MessageSquare size={20} /> : <ClipboardList size={20} />;
+  const typeLabel = mission.type === "course" ? "学习任务" : mission.type === "practice" ? "练习任务" : mission.type === "collection" ? "优秀案例采集" : "考试任务";
+  const icon = mission.type === "course" ? <BookOpen size={20} /> : mission.type === "practice" ? <MessageSquare size={20} /> : mission.type === "collection" ? <Camera size={20} /> : <ClipboardList size={20} />;
   const progressPercent = Math.min(100, Math.round((mission.progressCurrent / mission.progressTarget) * 100));
   const tagLabels = getMissionTagLabels(mission);
 
@@ -52,7 +52,7 @@ function TaskRow({ mission }: { key?: number; mission: Mission }) {
               ))}
             </div>
           )}
-          <div className="mt-3">
+          {isDone && mission.type === "collection" ? <div className="mt-3 text-[10px] font-bold text-emerald-600">已提交 · 感谢你的优秀案例</div> : <div className="mt-3">
             <div className="flex justify-between text-[10px] font-bold mb-1.5">
               <span className="text-gray-400 flex items-center gap-1"><Timer size={11} />{mission.dueText}</span>
               <span className={isDone ? "text-green-600" : "text-rose-500"}>{mission.progressCurrent}/{mission.progressTarget}</span>
@@ -60,7 +60,7 @@ function TaskRow({ mission }: { key?: number; mission: Mission }) {
             <div className="h-1.5 bg-gray-100 rounded-full overflow-hidden">
               <div className={`h-full rounded-full ${isDone ? "bg-green-500" : "bg-gradient-to-r from-pink-500 to-rose-400"}`} style={{ width: `${progressPercent}%` }} />
             </div>
-          </div>
+          </div>}
         </div>
       </div>
     </Link>

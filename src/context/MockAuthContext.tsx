@@ -6,6 +6,7 @@ import {
   missionIncludesUnit,
   mockUsers,
   type Mission,
+  type CollectionSubmission,
   type MissionUnitId,
   type MockUser,
   type RegionDataset
@@ -14,6 +15,7 @@ import {
 type MissionStatus = Mission["status"];
 type MissionType = Mission["type"];
 type MissionProgressState = Record<string, { status?: MissionStatus; progressCurrent?: number; completedUnitIds?: MissionUnitId[] }>;
+type CollectionSubmissionState = Record<string, CollectionSubmission>;
 
 interface MockAuthContextValue {
   user: MockUser | null;
@@ -28,6 +30,9 @@ interface MockAuthContextValue {
   getMissionById: (missionId: number) => Mission | undefined;
   getNextStudyUnit: (missionId: number) => number | undefined;
   getNextPracticeRoute: (missionId: number) => string | undefined;
+  getCollectionSubmission: (missionId: number) => CollectionSubmission | null;
+  submitCollection: (missionId: number, submission: CollectionSubmission) => void;
+  replaceCollectionSubmission: (missionId: number, submission: CollectionSubmission) => void;
 }
 
 const MockAuthContext = createContext<MockAuthContextValue | null>(null);
@@ -61,6 +66,9 @@ export function MockAuthProvider({ children }: { children: ReactNode }) {
       return {};
     }
   });
+  const [collectionSubmissions, setCollectionSubmissions] = useState<CollectionSubmissionState>(() => {
+    try { return JSON.parse(window.localStorage.getItem("beautyai.collectionSubmissions") ?? "{}") as CollectionSubmissionState; } catch { return {}; }
+  });
 
   const regionData = useMemo(() => {
     return user ? getRegionDataset(user.regionId) : null;
@@ -74,9 +82,10 @@ export function MockAuthProvider({ children }: { children: ReactNode }) {
       progressCurrent: getMergedMissionState(user.id, mission, missionProgress).progressCurrent,
       completedUnitIds: getMergedMissionState(user.id, mission, missionProgress).completedUnitIds,
       coverageCurrent: getMergedMissionState(user.id, mission, missionProgress).coverageCurrent,
-      coverageTarget: getMergedMissionState(user.id, mission, missionProgress).coverageTarget
+      coverageTarget: getMergedMissionState(user.id, mission, missionProgress).coverageTarget,
+      ...(mission.type === "collection" && collectionSubmissions[getMissionKey(user.id, mission.id)] ? { status: "done" as MissionStatus, progressCurrent: 1 } : {})
     }));
-  }, [missionProgress, regionData, user]);
+  }, [collectionSubmissions, missionProgress, regionData, user]);
 
   const loginAs = useCallback((userId: string) => {
     const nextUser = mockUsers.find(item => item.id === userId);
@@ -207,8 +216,28 @@ export function MockAuthProvider({ children }: { children: ReactNode }) {
     return "/practice";
   }, [missions]);
 
+  const getCollectionSubmission = useCallback((missionId: number) => {
+    if (!user) return null;
+    return collectionSubmissions[getMissionKey(user.id, missionId)] ?? null;
+  }, [collectionSubmissions, user]);
+
+  const saveCollection = useCallback((missionId: number, submission: CollectionSubmission) => {
+    if (!user) return;
+    const key = getMissionKey(user.id, missionId);
+    setCollectionSubmissions(prev => {
+      const next = { ...prev, [key]: submission };
+      window.localStorage.setItem("beautyai.collectionSubmissions", JSON.stringify(next));
+      return next;
+    });
+    setMissionProgress(prev => {
+      const next = { ...prev, [key]: { ...prev[key], status: "done" as MissionStatus, progressCurrent: 1 } };
+      window.localStorage.setItem("beautyai.missionProgress", JSON.stringify(next));
+      return next;
+    });
+  }, [user]);
+
   return (
-    <MockAuthContext.Provider value={{ user, regionData, missions, loginAs, updateAvatar, logout, completeMission, completeMissionBySource, recordCompletion, getMissionById, getNextStudyUnit, getNextPracticeRoute }}>
+    <MockAuthContext.Provider value={{ user, regionData, missions, loginAs, updateAvatar, logout, completeMission, completeMissionBySource, recordCompletion, getMissionById, getNextStudyUnit, getNextPracticeRoute, getCollectionSubmission, submitCollection: saveCollection, replaceCollectionSubmission: saveCollection }}>
       {children}
     </MockAuthContext.Provider>
   );

@@ -26,6 +26,8 @@ import { PracticeTaskDetail } from "./pages/PracticeTaskDetail";
 import { StudyTaskDetail } from "./pages/StudyTaskDetail";
 import { DailyPhotoCheckin } from "./pages/DailyPhotoCheckin";
 import { DailyPhotoCheckinResult } from "./pages/DailyPhotoCheckinResult";
+import { CollectionTaskDetail } from "./pages/CollectionTaskDetail";
+import { CollectionTaskSuccess } from "./pages/CollectionTaskSuccess";
 
 export default function App() {
   return (
@@ -66,6 +68,8 @@ function AppRoutes() {
           <Route path="tasks" element={<TaskList />} />
           <Route path="tasks/study/:missionId" element={<StudyTaskDetail />} />
           <Route path="tasks/practice/:missionId" element={<PracticeTaskDetail />} />
+          <Route path="tasks/collection/:missionId" element={<CollectionTaskDetail />} />
+          <Route path="tasks/collection/:missionId/success" element={<CollectionTaskSuccess />} />
         </Route>
       </Routes>
     </BrowserRouter>

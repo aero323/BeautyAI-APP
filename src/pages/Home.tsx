@@ -4,14 +4,13 @@ import { useMockAuth } from "../context/MockAuthContext";
 import type { Mission } from "../data/mockData";
 import { getMissionTagLabels } from "../lib/missionLabels";
 import { sortMissionsForToday } from "../lib/missionSort";
-import { checkinStorageKey } from "../lib/photoCheckin";
 
 export function Home() {
   const { user, regionData, missions } = useMockAuth();
   if (!user || !regionData) return null;
   const sortedMissions = sortMissionsForToday(missions);
   const avatarSrc = user.avatarUrl ?? `https://api.dicebear.com/7.x/avataaars/svg?seed=${user.avatarSeed}`;
-  const photoCheckinDone = isPhotoCheckinDone(user.id);
+  const checkinDone = Boolean(window.localStorage.getItem(`beautyai.dailyCheckin.${user.id}.${new Date().toISOString().slice(0, 10)}`));
 
   return (
     <div className="flex flex-col min-h-full bg-background pb-6">
@@ -42,7 +41,10 @@ export function Home() {
           </Link>
         </div>
 
-        <DailyCheckinBanner completed={photoCheckinDone} />
+        <Link to="/daily-checkin" className={`flex items-center gap-3 rounded-[22px] border p-3.5 shadow-sm transition-all hover:shadow-md ${checkinDone ? "border-emerald-100 bg-emerald-50/60" : "border-violet-100 bg-white"}`}>
+          <span className={`flex h-11 w-11 flex-none items-center justify-center rounded-2xl ${checkinDone ? "bg-emerald-100 text-emerald-600" : "bg-violet-50 text-violet-500"}`}>{checkinDone ? <CheckCircle2 size={21} /> : <Camera size={21} />}</span>
+          <span className="min-w-0 flex-1"><span className="flex items-center gap-2"><strong className={`truncate text-sm font-black ${checkinDone ? "text-emerald-800" : "text-gray-900"}`}>BA 每日拍照打卡</strong><span className={`flex-none rounded-full px-2 py-0.5 text-[9px] font-bold ${checkinDone ? "bg-emerald-100 text-emerald-700" : "bg-violet-50 text-violet-600"}`}>{checkinDone ? "已完成" : "今日待打卡"}</span></span><span className="mt-1 block text-[10px] text-gray-400">妆容照 + 柜台出样照</span></span><ChevronRight size={18} className={checkinDone ? "text-emerald-400" : "text-gray-300"} />
+        </Link>
 
         {/* Task Inbox */}
         <section>
@@ -59,43 +61,15 @@ export function Home() {
   );
 }
 
-function DailyCheckinBanner({ completed }: { completed: boolean }) {
-  return (
-    <Link
-      to="/daily-checkin"
-      className={`group flex items-center gap-3 rounded-[22px] border p-3.5 shadow-sm transition-all hover:shadow-md ${
-        completed
-          ? "border-emerald-100 bg-emerald-50/60 hover:border-emerald-200"
-          : "border-violet-100 bg-white hover:border-violet-200"
-      }`}
-    >
-      <span className={`flex h-11 w-11 flex-none items-center justify-center rounded-2xl ${completed ? "bg-emerald-100 text-emerald-600" : "bg-violet-50 text-violet-500"}`}>
-        {completed ? <CheckCircle2 size={21} /> : <Camera size={21} />}
-      </span>
-      <span className="min-w-0 flex-1">
-        <span className="flex items-center gap-2">
-          <strong className={`truncate text-sm font-black ${completed ? "text-emerald-800" : "text-gray-900"}`}>BA 每日拍照打卡</strong>
-          <span className={`flex-none rounded-full px-2 py-0.5 text-[9px] font-bold ${completed ? "bg-emerald-100 text-emerald-700" : "bg-violet-50 text-violet-600"}`}>
-            {completed ? "已完成" : "今日待打卡"}
-          </span>
-        </span>
-      </span>
-      <ChevronRight size={18} className={completed ? "text-emerald-400" : "text-gray-300"} />
-    </Link>
-  );
-}
-
-function isPhotoCheckinDone(userId: string) {
-  return window.localStorage.getItem(checkinStorageKey(userId)) === "submitted";
-}
-
 function TaskCard({ mission }: { key?: number; mission: Mission }) {
   const icon = mission.type === "course"
     ? <BookOpen size={20} />
     : mission.type === "practice"
       ? <MessageSquare size={20} />
+      : mission.type === "collection"
+        ? <Camera size={20} />
       : <ClipboardList size={20} />;
-  const typeLabel = mission.type === "course" ? "学习任务" : mission.type === "practice" ? "练习任务" : "考试任务";
+  const typeLabel = mission.type === "course" ? "学习任务" : mission.type === "practice" ? "练习任务" : mission.type === "collection" ? "优秀案例采集" : "考试任务";
   const isDone = mission.status === "done";
   const statusLabel = mission.status === "done" ? "Done" : mission.status === "in_progress" ? "In Progress" : mission.status === "overdue" ? "Overdue" : "To Do";
   const progressPercent = Math.min(100, Math.round((mission.progressCurrent / mission.progressTarget) * 100));
@@ -113,6 +87,8 @@ function TaskCard({ mission }: { key?: number; mission: Mission }) {
           ? isDone ? "bg-green-100 text-green-600" : "bg-indigo-50 text-indigo-500"
           : mission.type === "practice"
             ? isDone ? "bg-green-100 text-green-600" : "bg-pink-50 text-rose-500"
+            : mission.type === "collection"
+              ? isDone ? "bg-green-100 text-green-600" : "bg-violet-50 text-violet-500"
             : isDone ? "bg-green-100 text-green-600" : "bg-orange-50 text-orange-500"
       }`}>
         {isDone ? <CheckCircle2 size={22} /> : icon}
