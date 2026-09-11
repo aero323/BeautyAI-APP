@@ -1,60 +1,53 @@
 import type { ReactNode } from "react";
-import { Outlet, NavLink, useLocation } from "react-router-dom";
-import { Home, MessageSquare, BookOpen, User, Zap } from "lucide-react";
+import { NavLink, Outlet, useLocation } from "react-router-dom";
+import { ClipboardCheck, GraduationCap, House, MessagesSquare, UserRound } from "lucide-react";
 import { cn } from "../../lib/utils";
+
+const items = [
+  { to: "/", label: "首页", icon: House },
+  { to: "/learning", label: "学习", icon: GraduationCap },
+  { to: "/practice", label: "练习", icon: MessagesSquare },
+  { to: "/exam", label: "考试", icon: ClipboardCheck },
+  { to: "/profile", label: "我的", icon: UserRound }
+];
 
 export default function MobileLayout() {
   const location = useLocation();
-  const hideNavPaths = [
-    "/practice/chat", "/practice/result", 
-    "/script/chat", "/script/result",
-    "/exam/run", "/exam/intro", "/exam/result",
-    "/reading", "/daily-checkin", "/photo-checkin"
-  ];
-  
-  const shouldHideNav = hideNavPaths.some(path => location.pathname.startsWith(path));
+  const hideNavPrefixes = ["/assistant/session", "/learning/resource/", "/plans/", "/practice/", "/exam/", "/knowledge/", "/course/", "/video/", "/events/", "/business-action/", "/tasks", "/beauty"];
+  const hideNav = hideNavPrefixes.some(prefix => location.pathname.startsWith(prefix));
 
   return (
-    <div className="flex justify-center min-h-screen bg-background dark:bg-gray-900">
-      <div className="w-full max-w-[420px] bg-white dark:bg-gray-950 shadow-2xl min-h-screen flex flex-col relative overflow-hidden sm:border-x sm:border-pink-100">
-        <div className="flex-1 overflow-y-auto pb-20">
+    <div className="h-screen overflow-hidden bg-[#eef0f3] sm:py-4">
+      <div className="relative mx-auto flex h-screen w-full max-w-[420px] flex-col overflow-hidden bg-[#f6f7f9] shadow-2xl sm:h-[calc(100vh-2rem)] sm:rounded-[32px] sm:border sm:border-gray-200">
+        <main className={cn("min-h-0 flex-1 overflow-y-auto", !hideNav && "pb-24")}>
           <Outlet />
-        </div>
-        
-        {!shouldHideNav && (
-          <div className="absolute bottom-0 w-full h-20 bg-white/90 backdrop-blur-md dark:bg-gray-950/90 border-t border-pink-100 dark:border-gray-800 flex items-center justify-around px-2 pb-safe rounded-t-3xl shadow-[0_-4px_20px_rgba(244,63,94,0.05)] z-50">
-            <NavItem to="/" icon={<Home size={22} />} label="Home" />
-            <NavItem to="/course" icon={<BookOpen size={22} />} label="Course" />
-            <NavItem to="/practice" icon={<MessageSquare size={22} />} label="Practice" />
-            <NavItem to="/exam" icon={<Zap size={22} />} label="Exam" />
-            <NavItem to="/profile" icon={<User size={22} />} label="Profile" />
-          </div>
+        </main>
+        {!hideNav && (
+          <nav className="absolute inset-x-0 bottom-0 z-50 flex h-[82px] items-center justify-around border-t border-gray-200 bg-white/95 px-1 pb-safe backdrop-blur-xl">
+            {items.map(item => <NavItem key={item.to} {...item} />)}
+          </nav>
         )}
       </div>
     </div>
   );
 }
 
-function NavItem({ to, icon, label }: { to: string; icon: ReactNode; label: string }) {
+function NavItem({ to, label, icon: Icon }: { key?: string; to: string; label: string; icon: typeof House }) {
   return (
     <NavLink
       to={to}
-      className={({ isActive }) =>
-        cn(
-          "flex flex-col items-center justify-center w-14 h-full pt-2 space-y-1 transition-colors",
-          isActive ? "text-rose-500" : "text-gray-400 hover:text-rose-400 dark:text-gray-400 dark:hover:text-gray-100"
-        )
-      }
+      end={to === "/"}
+      className={({ isActive }) => cn(
+        "flex h-full min-w-0 flex-1 flex-col items-center justify-center gap-1 text-[11px] font-semibold transition-colors",
+        isActive ? "text-primary" : "text-gray-400"
+      )}
     >
       {({ isActive }) => (
         <>
-          <span className={cn(
-            "flex h-8 w-8 items-center justify-center rounded-2xl transition-colors",
-            isActive ? "bg-rose-50 text-rose-500" : "text-current"
-          )}>
-            {icon}
+          <span className={cn("flex h-9 w-9 items-center justify-center rounded-2xl", isActive && "bg-red-50")}>
+            <Icon size={21} strokeWidth={isActive ? 2.6 : 2} />
           </span>
-          <span className={cn("text-[10px]", isActive ? "font-bold" : "font-medium")}>{label}</span>
+          <span>{label}</span>
         </>
       )}
     </NavLink>

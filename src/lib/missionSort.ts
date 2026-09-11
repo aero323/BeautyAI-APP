@@ -2,8 +2,9 @@ import type { Mission } from "../data/mockData";
 
 const typePriority: Record<Mission["type"], number> = {
   exam: 0,
-  course: 1,
-  practice: 2
+  collection: 1,
+  course: 2,
+  practice: 3
 };
 
 export function sortMissionsForToday(missions: Mission[]) {

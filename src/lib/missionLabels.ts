@@ -1,6 +1,9 @@
 import type { Mission } from "../data/mockData";
 
 export function getMissionTagLabels(mission: Mission) {
+  if (mission.type === "collection") {
+    return [mission.sourceLabel === "总部" ? "总部" : mission.sourceLabel, mission.collectionTask?.mediaType === "video" ? "视频采集" : "音频采集"];
+  }
   if (mission.type === "practice") {
     return [getSourceLabel(mission), getFrequencyLabel(mission)];
   }

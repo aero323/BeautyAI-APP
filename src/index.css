@@ -1,42 +1,44 @@
 @import "tailwindcss";
 
 @theme {
-  --color-primary: #f43f5e; /* rose-500 */
+  --color-primary: #e60012;
+  --color-primary-hover: #c90010;
   --color-primary-foreground: #ffffff;
-  --color-primary-hover: #e11d48; /* rose-600 */
-  
-  --color-secondary: #fdf2f8; /* pink-50 */
-  --color-secondary-foreground: #be185d; /* pink-700 */
-
-  --color-background: #FFF0F5;
-  --color-destructive: #ef4444;
-  --color-destructive-foreground: #ffffff;
+  --color-secondary: #fff1f2;
+  --color-background: #f6f7f9;
+  --color-success: #16a34a;
+  --color-warning: #f59e0b;
 }
 
 @layer base {
+  * { box-sizing: border-box; }
+  html { background: #eef0f3; }
   body {
-    @apply bg-background text-gray-900 font-sans;
+    margin: 0;
+    min-width: 320px;
+    min-height: 100vh;
+    background: #eef0f3;
+    color: #111827;
+    font-family: Inter, "PingFang SC", "Microsoft YaHei", system-ui, sans-serif;
     -webkit-tap-highlight-color: transparent;
   }
+  button, a, input, textarea, select { -webkit-tap-highlight-color: transparent; }
+  button { cursor: pointer; }
 }
 
 @layer utilities {
-  .pb-safe {
-    padding-bottom: env(safe-area-inset-bottom, 20px);
-  }
-  .hide-scrollbar {
-    -ms-overflow-style: none;
-    scrollbar-width: none;
-  }
-  .hide-scrollbar::-webkit-scrollbar {
-    display: none;
-  }
-  .animation-bounce-in {
-    animation: bounce-in 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) both;
-  }
+  .pb-safe { padding-bottom: max(env(safe-area-inset-bottom), 12px); }
+  .pt-safe { padding-top: max(env(safe-area-inset-top), 12px); }
+  .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+  .hide-scrollbar::-webkit-scrollbar { display: none; }
+  .card { @apply rounded-[24px] border border-gray-100 bg-white shadow-sm; }
+  .page-x { @apply px-5; }
+  .tap { @apply transition-transform active:scale-[0.98]; }
 }
 
-@keyframes bounce-in {
-  0% { transform: scale(0.8); opacity: 0; }
-  100% { transform: scale(1); opacity: 1; }
+@keyframes pulse-soft {
+  0%, 100% { opacity: .45; transform: scale(.98); }
+  50% { opacity: 1; transform: scale(1.03); }
 }
+
+.pulse-soft { animation: pulse-soft 1.4s ease-in-out infinite; }
